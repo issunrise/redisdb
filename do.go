@@ -14,10 +14,6 @@ var (
 	maxTask  = 1024
 )
 
-// type RedisDb struct {
-//     redisClient
-// }
-
 type RedisClient struct {
 	pool *redis.Pool
 	task chan *Task
@@ -26,8 +22,6 @@ type RedisClient struct {
 type Task struct {
 	Cmd  string
 	Args redis.Args
-	// Mode MODE
-	// Key  string // 标识符，用于延迟执行
 }
 
 func NewRedisClient(server, password, db string) *RedisClient {
@@ -42,32 +36,6 @@ func ToRedisClient(pool *redis.Pool) *RedisClient {
 func (c *RedisClient) NewPubSubConn() *redis.PubSubConn {
 	return &redis.PubSubConn{c.pool.Get()}
 }
-
-//创建redis connection pool
-// func newPool2(server, password, db string) *redis.Pool {
-// 	return &redis.Pool{
-// 		MaxIdle:     3,
-// 		IdleTimeout: 240 * time.Second,
-// 		Dial: func() (redis.Conn, error) {
-// 			if password != "" {
-// 				if _, err := c.Do("AUTH", password); err != nil {
-// 					c.Close()
-// 					return nil, err
-// 				}
-// 			}
-// 			if db != "" {
-// 				log.Println("db", db)
-// 				c.Do("select", db)
-// 			}
-
-// 			return c, nil
-// 		},
-// 		TestOnBorrow: func(c redis.Conn, t time.Time) error {
-// 			_, err := c.Do("PING")
-// 			return err
-// 		},
-// 	}
-// }
 
 func newPool(addr, auth, db string) *redis.Pool {
 	pool := &redis.Pool{
@@ -136,20 +104,6 @@ func (c *RedisClient) Do(q *Task) bool {
 	}
 	return true
 }
-
-// func (c *RedisClient) Db(db string) *RedisClient {
-// 	new := c
-// 	conn := new.pool.Get()
-// 	conn.Do("select", db)
-// 	// if dial, err := new.pool.Dial(); err != nil {
-// 	// 	log.Println("Get dial error:", err)
-// 	// } else if _, err := dial.Do("select", db); err != nil {
-// 	// 	log.Println("Select db error:", err)
-// 	// }
-
-// 	 &RedisClient{newPool(server, password, db)}
-// 	return new
-// }
 
 func (c *RedisClient) MapToArgs(key string, obj map[string]string) redis.Args {
 	args := redis.Args{}.Add(key) // 转成数组
